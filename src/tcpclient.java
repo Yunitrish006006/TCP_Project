@@ -4,7 +4,7 @@ import java.io.*;
 // 1. 本程式必須與 TcpServer.java 程式搭配執行，先執行 TcpServer 再執行本程式。
 // 2. 本程式必須有一個參數，指定伺服器的 IP。
 // 用法範例： java TcpClient 127.0.0.1
- 
+// 3. 接收
 public class tcpclient {
     public static int port = 5500; // 設定傳送埠為 20。
  

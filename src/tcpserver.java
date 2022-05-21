@@ -5,7 +5,7 @@ import java.util.Scanner;
  
 // 1. 本程式必須與 TcpClient.java 程式搭配執行，先執行本程式再執行 UdpClient。
 // 2. 執行方法 : java TcpServer
- 
+// 3. 輸入
 public class tcpserver {
     public static int port = 5500; // 連接埠
  
