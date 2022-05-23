@@ -1,39 +1,43 @@
-import java.net.ServerSocket;
-import java.net.Socket;
+import javax.swing.text.Document;
+import java.io.IOException;
+import java.util.Arrays;
 
 public class ThreadServer extends java.lang.Thread {
-    private boolean OutServer = false;
-    private ServerSocket server;
-    private final int ServerPort = 8765;// 要監控的port
+    boolean started = false;
+    boolean send = false;
+    MessageGUI messageGUI;
     public void run() {
-        Socket socket;
-        java.io.BufferedInputStream in;
-        System.out.println("伺服器已啟動 !");
-        while (!OutServer) {
-            socket = null;
+        if(!started) {
+            messageGUI = new MessageGUI("Messenger");
             try {
-                synchronized (server) {
-                    socket = server.accept();
+                messageGUI.setUpUI();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            started = true;
+        }
+        else {
+            if(messageGUI.is_send) {
+                try {
+                    messageGUI.server.send(messageGUI.type.getDocument().toString());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
-                System.out.println("取得連線 : InetAddress = "
-                        + socket.getInetAddress());
-                // TimeOut時間
-                socket.setSoTimeout(15000);
-                in = new java.io.BufferedInputStream(socket.getInputStream());
-                byte[] b = new byte[1024];
-                String data = "";
-                int length;
-                while ((length = in.read(b)) > 0)// <=0的話就是結束了
-                {
-                    data += new String(b, 0, length);
+                messageGUI.UpToWindow(messageGUI.type.getDocument(),messageGUI.content.getDocument());
+                try {
+                    messageGUI.server.send(messageGUI.type.getDocument().toString());
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
                 }
-                System.out.println("我取得的值:" + data);
-                in.close();
-                in = null;
-                socket.close();
-            } catch (java.io.IOException e) {
-                System.out.println("Socket連線有問題 !");
-                System.out.println("IOException :" + e.toString());
+                messageGUI.type.setText("");
+            }
+            ClientEntity client = new ClientEntity(5555,"127.0.0.1");
+            try {
+                byte[] x = client.receive().getBytes();
+                String p = Arrays.toString(x);
+//                MessageGUI.UpToWindow((Document) (p),messageGUI.content.getDocument());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
     }

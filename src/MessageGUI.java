@@ -9,6 +9,16 @@ public class MessageGUI extends JFrame{
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     private final JFileChooser jFileChooser = new JFileChooser(new File("."));
     public JFrame gui = this;
+    public JTextPane type;
+    public JTextPane content;
+    public boolean is_send = false;
+    public ServerEntity server = new ServerEntity(5555);
+
+
+
+
+
+
     public MessageGUI(String Title) {
         super.setLocation(0,0);
         super.setVisible(true);
@@ -34,7 +44,7 @@ public class MessageGUI extends JFrame{
         StyleConstants.setAlignment(aSet, StyleConstants.ALIGN_LEFT);
         jTextPane.setCharacterAttributes(aSet,true);
     }
-    static void move(Document source, Document dest) {
+    static void UpToWindow(Document source, Document dest) {
         try {
 //            dest.remove(0, dest.getLength());
 
@@ -45,27 +55,26 @@ public class MessageGUI extends JFrame{
                     int start = element.getStartOffset();
                     int end = element.getEndOffset();
                     String text = source.getText(start, end - start);
-                    dest.insertString(dest.getLength(), text+"\r\n", element.getAttributes());
+                    dest.insertString(dest.getLength(), text, element.getAttributes());
                 }
             }
         } catch (BadLocationException e) {
             throw new RuntimeException(e);
         }
     }
-    public void setMessageGUI() {
+    public void setUpUI() throws IOException {
         Container container = super.getContentPane();
         container.setLayout(null);
-
-
-
-        JTextPane content = new JTextPane();
+        server.start();
+        
+        content = new JTextPane();
         content.setBounds(10, 69, 325, 242);
         content.setEditable(false);
         JScrollPane in_content = new JScrollPane(content, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         in_content.setBounds(10, 69, 325, 242);
         container.add(in_content);
 
-        JTextPane type = new JTextPane();
+        type = new JTextPane();
         type.setBounds(10, 354, 325, 101);
         container.add(type);
 
@@ -85,12 +94,13 @@ public class MessageGUI extends JFrame{
                         if(file!=null) {
                             ImageIcon imageIcon = new ImageIcon ( file.getCanonicalPath() );
                             Image image = imageIcon.getImage();
-                            Image resized_image = image.getScaledInstance(imageIcon.getIconWidth()/4,imageIcon.getIconHeight()/4,Image.SCALE_SMOOTH);
-                        /*
-                        BufferedImage bi = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-                        Graphics g = bi.createGraphics();
-                        g.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
-                        */
+                            int image_width = imageIcon.getIconWidth();
+                            int image_height = imageIcon.getIconHeight();
+                            while(image_width > 300) {
+                                image_width = image_width*9/10;
+                                image_height = image_height*9/10;
+                            }
+                            Image resized_image = image.getScaledInstance(image_width,image_height,Image.SCALE_SMOOTH);
                             type.insertIcon(new ImageIcon(resized_image));
                         }
                     } catch (FileNotFoundException e1) {
@@ -108,9 +118,7 @@ public class MessageGUI extends JFrame{
         send.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                move(type.getDocument(),content.getDocument());
-//                content.setText(content.getText()+type.getText()+"\r\n");
-                type.setText("");
+                 is_send = true;
             }
         });
         send.setBounds(120, 321, 85, 23);
