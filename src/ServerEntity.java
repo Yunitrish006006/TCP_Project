@@ -33,6 +33,13 @@ public class ServerEntity {
         socket.close();
     }
 
+    public void send_byte(byte[] buf) throws IOException {
+        Socket socket = serverSocket.accept();
+        OutputStream outputStream = socket.getOutputStream();
+        outputStream.write(buf);
+        outputStream.close();
+        socket.close();
+    }
     public static void main(String[] args) throws IOException {
         System.out.println("To Send : ");
         ServerEntity server = new ServerEntity(5555);

@@ -5,7 +5,7 @@ import java.net.Socket;
 public class ClientEntity {
     public int port;
     public String serverIP;
-    ;
+
 
 
     public ClientEntity(int port,String serverIP) {

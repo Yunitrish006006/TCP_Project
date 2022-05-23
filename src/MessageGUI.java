@@ -12,8 +12,7 @@ public class MessageGUI extends JFrame{
     public JTextPane type;
     public JTextPane content;
     public boolean is_send = false;
-    public ServerEntity server = new ServerEntity(5555);
-
+    public String img_path = "";
 
 
 
@@ -63,10 +62,10 @@ public class MessageGUI extends JFrame{
         }
     }
     public void setUpUI() throws IOException {
+
         Container container = super.getContentPane();
         container.setLayout(null);
-        server.start();
-        
+
         content = new JTextPane();
         content.setBounds(10, 69, 325, 242);
         content.setEditable(false);
@@ -92,6 +91,7 @@ public class MessageGUI extends JFrame{
                     try { //被選中的檔案儲存為檔案物件
                         File file = jFileChooser.getSelectedFile();
                         if(file!=null) {
+                            img_path = file.getCanonicalPath();
                             ImageIcon imageIcon = new ImageIcon ( file.getCanonicalPath() );
                             Image image = imageIcon.getImage();
                             int image_width = imageIcon.getIconWidth();
@@ -119,6 +119,7 @@ public class MessageGUI extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
                  is_send = true;
+                 System.out.println("hi");
             }
         });
         send.setBounds(120, 321, 85, 23);
