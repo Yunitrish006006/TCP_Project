@@ -2,14 +2,18 @@ import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.Scanner;
 
 public class MessageGUI extends JFrame{
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    private final JFileChooser jFileChooser = new JFileChooser(new File("."));
+    public JFrame gui = this;
     public MessageGUI(String Title) {
         super.setLocation(0,0);
         super.setVisible(true);
@@ -35,48 +39,6 @@ public class MessageGUI extends JFrame{
         StyleConstants.setAlignment(aSet, StyleConstants.ALIGN_LEFT);
         jTextPane.setCharacterAttributes(aSet,true);
     }
-
-
-    private JTextArea ta;
-    private JFileChooser jfc = new JFileChooser(new File("."));
-    private JButton bOpen;
-    public void fileGetter() {
-        ta = new JTextArea(10, 20);
-        bOpen = new JButton("選擇檔案");
-        bOpen.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                //開啟檔案選擇器對話方塊
-                int status = jfc.showOpenDialog(bOpen);
-                //沒有選開啟按鈕結果提示
-                if (status != JFileChooser.APPROVE_OPTION) {
-                    ta.setText("沒有選中檔案");
-                } else {
-                    try { //被選中的檔案儲存為檔案物件
-                        File file = jfc.getSelectedFile();
-                        Scanner scanner = new Scanner(file);
-                        String info = "";
-                        while (scanner.hasNextLine()) {
-                            String str = scanner.nextLine();
-                            info += str + "/r/n";
-                        }
-                        //把讀取的資料存到文字框中
-                        ta.setText(info);
-                    } catch (FileNotFoundException e1) {
-                        System.out.println("系統沒有找到此檔案");
-                        e1.printStackTrace();
-                    }
-                }
-            }
-        });
-        this.add(bOpen);
-        this.setTitle("檔案選擇器的使用");
-        this.setLayout(new FlowLayout(FlowLayout.CENTER, 15, 10));
-        this.setSize(300, 300);
-        this.setLocationRelativeTo(null);
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setVisible(true);
-    }
     public void setMessageGUI() {
         Container container = super.getContentPane();
         container.setLayout(null);
@@ -92,13 +54,46 @@ public class MessageGUI extends JFrame{
 
         JButton selectImage = new JButton("圖片");
         selectImage.setBounds(10, 321, 85, 23);
+        selectImage.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //開啟檔案選擇器對話方塊
+                int status = jFileChooser.showOpenDialog(selectImage);
+                //沒有選開啟按鈕結果提示
+                if (status != JFileChooser.APPROVE_OPTION) {
+                    //#沒有選中檔案
+                } else {
+                    try { //被選中的檔案儲存為檔案物件
+                        File file = jFileChooser.getSelectedFile();
+                        ImageIcon imageIcon = new ImageIcon ( file.getCanonicalPath() );
+                        Image image = imageIcon.getImage();
+                        //縮小圖片 法一
+                        Image resized_image = image.getScaledInstance(100,100,Image.SCALE_SMOOTH);
+                        //縮小圖片 法二
+//                        BufferedImage bi = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+//                        Graphics g = bi.createGraphics();
+//                        g.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
+                        //bi 為最終結果
+                        //
+                        type.insertIcon(new ImageIcon(resized_image));
+                    } catch (FileNotFoundException e1) {
+//                        System.out.println("系統沒有找到此檔案");
+                        e1.printStackTrace();
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            }
+        });
         container.add(selectImage);
 
         JButton send = new JButton("傳送");
         send.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                content.setText(content.getText()+type.getText()+"\r\n");
+                StyledDocument doc = type.getStyledDocument();
+                content.setStyledDocument(doc);
+//                content.setText(content.getText()+type.getText()+"\r\n");
                 type.setText("");
             }
         });

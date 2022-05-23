@@ -6,11 +6,11 @@ import java.io.*;
 // 用法範例： java TcpClient 127.0.0.1
 // 3. 接收
 public class tcpclient {
-    public static int port = 5500; // 設定傳送埠為 20。
+    public static int port = 5555; // 設定傳送埠為 20。
  
     public static void main(String[] args) throws Exception {
         System.out.println("[Client start]");
-        Socket client = new Socket("localhost", port);     // 根據 args[0] 的 TCP Socket.
+        Socket client = new Socket("127.0.0.1", port);     // 根據 args[0] 的 TCP Socket.
         InputStream in = client.getInputStream();      // 取得輸入訊息的串流
         StringBuffer buf = new StringBuffer();        // 建立讀取字串。
         try {
