@@ -1,14 +1,9 @@
 import javax.swing.*;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
+import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
 import java.io.*;
-import java.util.Scanner;
 
 public class MessageGUI extends JFrame{
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -39,14 +34,36 @@ public class MessageGUI extends JFrame{
         StyleConstants.setAlignment(aSet, StyleConstants.ALIGN_LEFT);
         jTextPane.setCharacterAttributes(aSet,true);
     }
+    static void move(Document source, Document dest) {
+        try {
+//            dest.remove(0, dest.getLength());
+
+            ElementIterator iterator = new ElementIterator(source);
+            Element element;
+            while ((element = iterator.next()) != null) {
+                if (element.isLeaf()) {
+                    int start = element.getStartOffset();
+                    int end = element.getEndOffset();
+                    String text = source.getText(start, end - start);
+                    dest.insertString(dest.getLength(), text+"\r\n", element.getAttributes());
+                }
+            }
+        } catch (BadLocationException e) {
+            throw new RuntimeException(e);
+        }
+    }
     public void setMessageGUI() {
         Container container = super.getContentPane();
         container.setLayout(null);
 
+
+
         JTextPane content = new JTextPane();
         content.setBounds(10, 69, 325, 242);
         content.setEditable(false);
-        container.add(content);
+        JScrollPane in_content = new JScrollPane(content, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        in_content.setBounds(10, 69, 325, 242);
+        container.add(in_content);
 
         JTextPane type = new JTextPane();
         type.setBounds(10, 354, 325, 101);
@@ -65,19 +82,19 @@ public class MessageGUI extends JFrame{
                 } else {
                     try { //被選中的檔案儲存為檔案物件
                         File file = jFileChooser.getSelectedFile();
-                        ImageIcon imageIcon = new ImageIcon ( file.getCanonicalPath() );
-                        Image image = imageIcon.getImage();
-                        //縮小圖片 法一
-                        Image resized_image = image.getScaledInstance(100,100,Image.SCALE_SMOOTH);
-                        //縮小圖片 法二
-//                        BufferedImage bi = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-//                        Graphics g = bi.createGraphics();
-//                        g.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
-                        //bi 為最終結果
-                        //
-                        type.insertIcon(new ImageIcon(resized_image));
+                        if(file!=null) {
+                            ImageIcon imageIcon = new ImageIcon ( file.getCanonicalPath() );
+                            Image image = imageIcon.getImage();
+                            Image resized_image = image.getScaledInstance(imageIcon.getIconWidth()/4,imageIcon.getIconHeight()/4,Image.SCALE_SMOOTH);
+                        /*
+                        BufferedImage bi = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+                        Graphics g = bi.createGraphics();
+                        g.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
+                        */
+                            type.insertIcon(new ImageIcon(resized_image));
+                        }
                     } catch (FileNotFoundException e1) {
-//                        System.out.println("系統沒有找到此檔案");
+                        System.out.println("系統沒有找到此檔案");
                         e1.printStackTrace();
                     } catch (IOException ex) {
                         throw new RuntimeException(ex);
@@ -91,8 +108,7 @@ public class MessageGUI extends JFrame{
         send.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                StyledDocument doc = type.getStyledDocument();
-                content.setStyledDocument(doc);
+                move(type.getDocument(),content.getDocument());
 //                content.setText(content.getText()+type.getText()+"\r\n");
                 type.setText("");
             }
